@@ -129,7 +129,9 @@ function love.load()
     love.window.setMode(0, 0, {
         fullscreen = true,
         fullscreentype = "desktop",
-        resizable = false
+        resizable = false,
+        vsync = 1,
+        msaa = 0
     })
 
     FONT = love.graphics.newFont(
