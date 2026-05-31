@@ -20,7 +20,7 @@ local prescriptData = {
     typingStarted = false,
 
     scrambleText = "",
-    phase = "idle",
+    phase = "finished",
     text = "",
 }
 
@@ -243,9 +243,8 @@ function love.draw()
     drawLine(line2, #line1 + 1, centerY + lineHeight)
 end
 
-function love.keypressed(key)
-    if key == "space" then
+function love.mousepressed(x, y, button)
+    if button == 1 and prescriptData.phase == "finished" then
         runPrescript()
     end
 end
-
