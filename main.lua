@@ -93,7 +93,7 @@ local function updateFont()
     local height = love.graphics.getHeight()
 
     local referenceHeight = 1080
-    local referenceFontSize = 64
+    local referenceFontSize = 84
 
     local fontSize = math.max(
         8,
@@ -136,7 +136,7 @@ function love.load()
     local height = love.graphics.getHeight()
 
     local referenceHeight = 1080
-    local referenceFontSize = 64
+    local referenceFontSize = 84
 
     local fontSize = math.max(
         8,
