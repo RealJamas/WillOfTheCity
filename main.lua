@@ -245,8 +245,8 @@ function love.draw()
     drawLine(line2, #line1 + 1, centerY + lineHeight)
 end
 
-function love.mousepressed(x, y, button)
-    if button == 1 and prescriptData.phase == "finished" then
+function love.keypressed(key)
+    if key == "space" then
         runPrescript()
     end
 end
