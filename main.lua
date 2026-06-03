@@ -261,7 +261,11 @@ function love.draw()
 end
 
 function love.keypressed(key)
-    if key == "space" then
+    if key == "space" and prescriptData.phase == "finished" then
         runPrescript()
+    end
+
+    if key == "escape" then
+        love.event.quit()
     end
 end
