@@ -108,6 +108,34 @@ local function updateFont()
     love.graphics.setFont(FONT)
 end
 
+local function wrapText(text, maxWidth)
+    local lines = {}
+    local currentLine = ""
+
+    for word in string.gmatch(text, "%S+") do
+        local testLine
+
+        if currentLine == "" then
+            testLine = word
+        else
+            testLine = currentLine .. " " .. word
+        end
+
+        if FONT:getWidth(testLine) <= maxWidth then
+            currentLine = testLine
+        else
+            table.insert(lines, currentLine)
+            currentLine = word
+        end
+    end
+
+    if currentLine ~= "" then
+        table.insert(lines, currentLine)
+    end
+
+    return lines
+end
+
 local function runPrescript()
     prescriptData.visibleCharacters = 0
     prescriptData.decodedCharacters = 0
@@ -206,58 +234,78 @@ end
 function love.draw()
     local width = love.graphics.getWidth()
     local height = love.graphics.getHeight()
-
     local textHeight = FONT:getHeight()
     local lineHeight = textHeight + 6
-
-    -- split text into two halves
     local text = prescriptData.text
-    local mid = math.floor(#text / 2)
+    local maxLineWidth = width * 0.85
+    local lines = {}
+    local pos = 1
 
-    -- find a better break point (optional: break at space)
-    for i = mid, 1, -1 do
-        if string.sub(text, i, i) == " " then
-            mid = i
-            break
+    while pos <= #text and #lines < 4 do
+        while pos <= #text and string.sub(text, pos, pos) == " " do
+            pos = pos + 1
+        end
+        if pos > #text then break end
+
+        local lineEnd = pos
+        while lineEnd < #text do
+            if FONT:getWidth(string.sub(text, pos, lineEnd + 1)) > maxLineWidth then
+                break
+            end
+            lineEnd = lineEnd + 1
+        end
+
+        local nextPos
+        if #lines == 3 or lineEnd >= #text then
+            lineEnd = #text
+            nextPos = #text + 1
+        else
+            local breakAt = nil
+            for i = lineEnd, pos, -1 do
+                if string.sub(text, i, i) == " " then
+                    breakAt = i
+                    break
+                end
+            end
+
+            if breakAt then
+                lineEnd = breakAt - 1 
+                nextPos = breakAt + 1
+            else
+                nextPos = lineEnd + 1
+            end
+        end
+
+        table.insert(lines, {
+            text = string.sub(text, pos, lineEnd),
+            startIndex = pos,
+        })
+
+        pos = nextPos
+    end
+
+    local function drawLine(line, scrambleStartIndex, y)
+        local positions = {}
+        local totalWidth = 0
+        for i = 1, #line do
+            local char = string.sub(line, i, i)
+            positions[i] = totalWidth
+            totalWidth = totalWidth + FONT:getWidth(char)
+        end
+
+        local startX = (width - totalWidth) / 2
+        for i = 1, #line do
+            local globalIndex = scrambleStartIndex + (i - 1)
+            local character = string.sub(prescriptData.scrambleText, globalIndex, globalIndex)
+            drawGlowChar(character, startX + positions[i], y, 0.604, 0.839, 1)
         end
     end
 
-    local line1 = string.sub(text, 1, mid)
-    local line2 = string.sub(text, mid + 1)
-
-    local function drawLine(line, scrambleStartIndex, y)
-       local positions = {}
-    local totalWidth = 0
-
-    for i = 1, #line do
-        local char = string.sub(line, i, i)
-        positions[i] = totalWidth
-        totalWidth = totalWidth + FONT:getWidth(char)
+    local totalTextHeight = #lines * lineHeight
+    local startY = (height - totalTextHeight) / 2
+    for i, lineData in ipairs(lines) do
+        drawLine(lineData.text, lineData.startIndex, startY + (i - 1) * lineHeight)
     end
-
-    local startX = (width - totalWidth) / 2
-
-    for i = 1, #line do
-        local globalIndex = scrambleStartIndex + (i - 1)
-
-        local character =
-            string.sub(prescriptData.scrambleText, globalIndex, globalIndex)
-
-        drawGlowChar(
-            character,
-            startX + positions[i],
-            y,
-            0.604,
-            0.839,
-            1
-        )
-    end
-    end
-
-    local centerY = height / 2 - lineHeight / 2
-
-    drawLine(line1, 1, centerY)
-    drawLine(line2, #line1 + 1, centerY + lineHeight)
 end
 
 function love.keypressed(key)
