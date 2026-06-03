@@ -89,25 +89,23 @@ local function updateScrambleText()
     prescriptData.scrambleText = result
 end
 
-local function getDisplayText()
-    local result = ""
+local function updateFont()
+    local height = love.graphics.getHeight()
 
-    for i = 1, prescriptData.visibleCharacters do
-        local actual =
-            string.sub(prescriptData.text, i, i)
+    local referenceHeight = 1080
+    local referenceFontSize = 48
 
-        if i <= prescriptData.decodedCharacters then
-            result = result .. actual
+    local fontSize = math.max(
+        8,
+        math.floor(referenceFontSize * (height / referenceHeight))
+    )
 
-        elseif actual == " " then
-            result = result .. " "
+    FONT = love.graphics.newFont(
+        "assets/fonts/PixelifySans-VariableFont_wght.ttf",
+        fontSize
+    )
 
-        else
-            result = result .. randomCharacter()
-        end
-    end
-
-    return result
+    love.graphics.setFont(FONT)
 end
 
 local function runPrescript()
@@ -134,13 +132,30 @@ function love.load()
         msaa = 0
     })
 
-    FONT = love.graphics.newFont(
-        "assets/fonts/PixelifySans-VariableFont_wght.ttf",
-        24
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+
+    local referenceHeight = 1080
+    local referenceFontSize = 24
+
+    local fontSize = math.max(
+        8,
+        math.floor(referenceFontSize * (height / referenceHeight))
     )
 
-    love.graphics.setColor(0.604, 0.839, 1, 1)
+    FONT = love.graphics.newFont(
+        "assets/fonts/PixelifySans-VariableFont_wght.ttf",
+        fontSize
+    )
+
     love.graphics.setFont(FONT)
+    love.graphics.setColor(0.604, 0.839, 1, 1)
+
+    updateFont()
+end
+
+function love.resize()
+    updateFont()
 end
 
 function love.update(dt)
