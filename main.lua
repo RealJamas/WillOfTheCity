@@ -108,34 +108,6 @@ local function updateFont()
     love.graphics.setFont(FONT)
 end
 
-local function wrapText(text, maxWidth)
-    local lines = {}
-    local currentLine = ""
-
-    for word in string.gmatch(text, "%S+") do
-        local testLine
-
-        if currentLine == "" then
-            testLine = word
-        else
-            testLine = currentLine .. " " .. word
-        end
-
-        if FONT:getWidth(testLine) <= maxWidth then
-            currentLine = testLine
-        else
-            table.insert(lines, currentLine)
-            currentLine = word
-        end
-    end
-
-    if currentLine ~= "" then
-        table.insert(lines, currentLine)
-    end
-
-    return lines
-end
-
 local function runPrescript()
     prescriptData.visibleCharacters = 0
     prescriptData.decodedCharacters = 0
@@ -159,6 +131,8 @@ function love.load()
         vsync = 1,
         msaa = 0
     })
+
+    love.mouse.setVisible(false)
 
     local width = love.graphics.getWidth()
     local height = love.graphics.getHeight()
